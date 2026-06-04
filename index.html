@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="COMEDK ECE College Analysis Dashboard — Smart admission decision support for ECE branch at rank ~12,000 GM">
+    <meta name="theme-color" content="#4361ee">
+    <title>COMEDK ECE Dashboard — College Analysis 2026</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+    
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/styles.css?v=3.2">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2 class="loading-title">COMEDK ECE Dashboard</h2>
+            <p class="loading-subtitle">Loading college data...</p>
+            <p style="font-size:0.75rem; opacity:0.8; margin-top:24px; font-weight:600; line-height:1.4;">Developed by Reddy Mani Simha<br><span style="font-size:0.688rem; opacity:0.9;">(son of Highly Qualified Amma)</span></p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display:none;">
+        <nav id="navbar"></nav>
+        <main id="main-content"></main>
+        <!-- Footer Branding -->
+        <footer id="app-footer" class="app-footer">
+            Developed by <span class="footer-highlight">Reddy Mani Simha (son of Highly Qualified Amma)</span> for <span class="footer-highlight">Erripapa Ganesh</span>
+        </footer>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Dark Mode Floating Toggle -->
+    <button id="theme-toggle-fab" class="theme-toggle-btn" onclick="App.toggleTheme()" aria-label="Toggle Dark Mode">
+        <span class="theme-toggle-icon"></span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="js/data.js?v=3.2"></script>
+    <script src="js/router.js?v=3.2"></script>
+    <script src="js/components/badges.js?v=3.2"></script>
+    <script src="js/components/charts.js?v=3.2"></script>
+    <script src="js/components/collegeCard.js?v=3.2"></script>
+    <script src="js/components/navbar.js?v=3.2"></script>
+    <script src="js/components/filters.js?v=3.2"></script>
+    <script src="js/pages/dashboard.js?v=3.2"></script>
+    <script src="js/pages/explorer.js?v=3.2"></script>
+    <script src="js/pages/details.js?v=3.2"></script>
+    <script src="js/pages/compare.js?v=3.2"></script>
+    <script src="js/pages/preferences.js?v=3.2"></script>
+    <script src="js/pages/methodology.js?v=3.2"></script>
+    <script src="js/app.js?v=3.2"></script>
+</body>
+</html>
