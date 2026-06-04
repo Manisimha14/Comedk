@@ -43,11 +43,16 @@ Pages.Compare = (function () {
             </div>
         `;
 
+        if (selected.length >= 2) {
+            setTimeout(() => {
+                Charts.renderRoiChart('compare-roi-chart', selected);
+            }, 100);
+        }
     }
 
     function renderComparisonTable(selected) {
         const metrics = [
-            { label: 'Recommendation Score', key: 'recommendation_score', format: v => v, higherBetter: true },
+            { label: 'Overall ECE Rating (Excel)', key: 'overall_rating', format: v => v ? v.toFixed(2) : 'N/A', higherBetter: true },
             { label: 'Tier', key: 'tier', format: v => v, custom: true },
             { label: 'Probability', key: 'probability', format: v => v ? Math.round(v) + '%' : 'N/A', higherBetter: true },
             { label: 'Confidence', key: 'confidence', format: v => v || 'N/A', custom: true },
@@ -57,11 +62,22 @@ Pages.Compare = (function () {
             { label: 'NAAC Grade', key: 'naac_grade', format: v => v || 'N/A', custom: true },
             { label: 'Avg Package', key: 'average_package', format: v => v ? '₹' + v + ' LPA <span style="font-size:0.688rem;color:var(--prob-green);">(Mum\'s Fav 👩‍🍳)</span>' : 'N/A', higherBetter: true },
             { label: 'Total Fees', key: 'fees', format: v => v ? '₹' + v + 'L <span style="font-size:0.688rem;color:var(--prob-orange);">(Dad\'s Fav 💸)</span>' : 'N/A', higherBetter: false },
+            {
+                label: 'Profile Budget Match',
+                key: 'fees',
+                format: (v, c) => {
+                    const profile = AppData.getStudentProfile();
+                    if (!profile.maxBudget) return '🟢 Limit Not Set';
+                    if (!v) return 'N/A';
+                    if (v <= profile.maxBudget) return '✅ Within Budget';
+                    return `❌ Exceeds (₹${(v - profile.maxBudget).toFixed(2)}L over)`;
+                },
+                custom: true
+            },
             { label: 'Hostel', key: 'hostel', format: v => v && v.toLowerCase() === 'yes' ? '✅ Yes' : (v || 'N/A'), custom: true },
             { label: 'Location', key: 'bangalore_proximity', format: v => v || 'N/A', custom: true },
             { label: 'ECE Labs', key: 'labs_rating', format: v => v || 'N/A', custom: true },
             { label: 'ECE Opportunity', key: 'ece_opportunity', format: v => v || 'N/A', custom: true },
-            { label: 'Overall Rating', key: 'overall_rating', format: v => v || 'N/A', higherBetter: true },
             { label: '2024 ECE Seats', key: 'seats_2024', format: v => v || 'N/A', custom: true },
             { label: '2025 ECE Seats', key: 'seats_2025', format: v => v || 'N/A', custom: true },
         ];
@@ -158,6 +174,14 @@ Pages.Compare = (function () {
         return `
             ${insightsHtml}
 
+            <!-- ROI Scatter Plot Card -->
+            <div class="method-card mb-16" style="padding:16px;">
+                <h3 style="margin-bottom:12px; font-size:0.875rem;">📈 Placements vs. Total Fees ROI Scatter Plot</h3>
+                <div class="chart-container" style="position:relative; height:320px; width:100%;">
+                    <canvas id="compare-roi-chart"></canvas>
+                </div>
+            </div>
+
             <div class="compare-table-wrapper">
                 <table class="compare-table">
                     <thead>
@@ -192,7 +216,7 @@ Pages.Compare = (function () {
                                     <th>${metric.label}</th>
                                     ${selected.map((c, i) => {
                                         const cls = i === bestIdx ? 'best' : (i === worstIdx ? 'worst' : '');
-                                        return `<td class="${cls}">${metric.format(c[metric.key])}</td>`;
+                                        return `<td class="${cls}">${metric.format(c[metric.key], c)}</td>`;
                                     }).join('')}
                                 </tr>
                             `;

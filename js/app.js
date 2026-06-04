@@ -56,6 +56,7 @@ const App = (function () {
                 '/college/:code': (params) => { Pages.Details.render(params.code); updateNavbar(); },
                 '/compare': () => { Pages.Compare.render(); updateNavbar(); },
                 '/preferences': () => { Pages.Preferences.render(); updateNavbar(); },
+                '/simulator': () => { Pages.Simulator.render(); updateNavbar(); },
                 '/methodology': () => { Pages.Methodology.render(); updateNavbar(); },
             });
 
@@ -184,6 +185,17 @@ const App = (function () {
                                 <option value="HK" ${profile.category === 'HK' ? 'selected' : ''}>Hyderabad-Karnataka (HK) Quota</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="profile-budget" style="font-size:0.813rem;font-weight:600;display:block;margin-bottom:6px;">Maximum 4-Year Budget (Fees + Hostel):</label>
+                            <select id="profile-budget" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:var(--bg-secondary);color:var(--text-primary);outline:none;font-weight:500;">
+                                <option value="" ${profile.maxBudget === null ? 'selected' : ''}>No Limit</option>
+                                <option value="10.0" ${profile.maxBudget === 10.0 ? 'selected' : ''}>₹10.0 Lakhs</option>
+                                <option value="12.0" ${profile.maxBudget === 12.0 ? 'selected' : ''}>₹12.0 Lakhs</option>
+                                <option value="15.0" ${profile.maxBudget === 15.0 ? 'selected' : ''}>₹15.0 Lakhs</option>
+                                <option value="18.0" ${profile.maxBudget === 18.0 ? 'selected' : ''}>₹18.0 Lakhs</option>
+                                <option value="20.0" ${profile.maxBudget === 20.0 ? 'selected' : ''}>₹20.0 Lakhs</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer" style="display:flex;justify-content:space-between;gap:10px;margin-top:20px;">
@@ -209,12 +221,14 @@ const App = (function () {
     function saveProfile() {
         const rankEl = document.getElementById('profile-rank');
         const categoryEl = document.getElementById('profile-category');
-        if (!rankEl || !categoryEl) return;
+        const budgetEl = document.getElementById('profile-budget');
+        if (!rankEl || !categoryEl || !budgetEl) return;
         
         const rank = parseInt(rankEl.value) || 12000;
         const category = categoryEl.value;
+        const maxBudget = budgetEl.value ? parseFloat(budgetEl.value) : null;
         
-        AppData.saveStudentProfile({ rank, category });
+        AppData.saveStudentProfile({ rank, category, maxBudget });
         closeProfileModal();
         AppData.showToast('🎓 Profile updated! Values recalculated.', 'success');
         
@@ -223,9 +237,9 @@ const App = (function () {
     }
 
     function resetProfileToDefault() {
-        AppData.saveStudentProfile({ rank: 12000, category: 'GM' });
+        AppData.saveStudentProfile({ rank: 12000, category: 'GM', maxBudget: null });
         closeProfileModal();
-        AppData.showToast('🎓 Profile reset to default (12,000 GM)', 'info');
+        AppData.showToast('🎓 Profile reset to default (12,000 GM, No Limit)', 'info');
         window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
 

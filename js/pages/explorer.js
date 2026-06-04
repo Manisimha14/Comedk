@@ -96,12 +96,16 @@ Pages.Explorer = (function () {
         // Filter by search query
         if (searchQuery.trim() !== '') {
             const q = searchQuery.toLowerCase();
-            list = list.filter(c => 
-                c.college_name.toLowerCase().includes(q) ||
-                c.college_code.toLowerCase().includes(q) ||
-                c.tier.toLowerCase().includes(q) ||
-                (c.bangalore_proximity || '').toLowerCase().includes(q)
-            );
+            list = list.filter(c => {
+                const tierName = `tier ${c.tier.toLowerCase()}`;
+                const tierNameReverse = `${c.tier.toLowerCase()} tier`;
+                return c.college_name.toLowerCase().includes(q) ||
+                    c.college_code.toLowerCase().includes(q) ||
+                    c.tier.toLowerCase() === q ||
+                    tierName.includes(q) ||
+                    tierNameReverse.includes(q) ||
+                    (c.bangalore_proximity || '').toLowerCase().includes(q);
+            });
         }
 
         const grid = document.getElementById('explorer-cards-grid');

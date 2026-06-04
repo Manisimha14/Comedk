@@ -18,7 +18,8 @@ const AppData = (function () {
     let studentProfile = {
         rank: 12000,
         branch: 'ECE',
-        category: 'GM'
+        category: 'GM',
+        maxBudget: null
     };
 
     // Load profile from localStorage immediately
@@ -64,6 +65,33 @@ const AppData = (function () {
                 return obj;
             })
             .filter(row => row['College Name'] && row['College Code']); // Skip empty rows
+    }
+
+    // ---- Data Sanitization (XSS Protection) ----
+    function sanitize(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/[&<>"']/g, function (m) {
+            switch (m) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case "'": return '&#39;';
+                default: return m;
+            }
+        });
+    }
+
+    function sanitizeObject(obj) {
+        if (!obj || typeof obj !== 'object') return obj;
+        for (const key in obj) {
+            if (typeof obj[key] === 'string') {
+                obj[key] = sanitize(obj[key]);
+            } else if (typeof obj[key] === 'object') {
+                sanitizeObject(obj[key]);
+            }
+        }
+        return obj;
     }
 
     // ---- Parse & Normalize ----
@@ -140,7 +168,7 @@ const AppData = (function () {
             }
         }
 
-        return c;
+        return sanitizeObject(c);
     }
 
     // ---- Parsing Helpers ----
@@ -314,36 +342,44 @@ const AppData = (function () {
     // ---- Public API ----
     // Dynamic Probability interpolation
     function calculateDynamicProbability(c, rank) {
+        const category = studentProfile.category;
+        let quotaMultiplier = 1.0;
+        if (category === 'K') quotaMultiplier = 1.15;
+        else if (category === 'HK') quotaMultiplier = 1.30;
+
         const finalCutoff = c.cutoff_2025_r4 || c.predicted_r4_2026_mid || c.cutoff_2024_r4 || c.cutoff_2025_r3;
         const r1Cutoff = c.cutoff_2025_r1 || c.predicted_r1_2026_mid;
 
-        if (!finalCutoff) {
+        const adjustedFinal = finalCutoff ? finalCutoff * quotaMultiplier : null;
+        const adjustedR1 = r1Cutoff ? r1Cutoff * quotaMultiplier : null;
+
+        if (!adjustedFinal) {
             // Fallback to sheet probability
             return parseProbability(c.probability_text);
         }
 
-        if (r1Cutoff && rank <= r1Cutoff) {
-            const ratio = rank / r1Cutoff;
+        if (adjustedR1 && rank <= adjustedR1) {
+            const ratio = rank / adjustedR1;
             const prob = 90 + (1 - ratio) * 9.5;
             return Math.min(Math.max(prob, 90), 99.5);
         }
 
-        if (r1Cutoff && rank <= finalCutoff) {
-            const range = finalCutoff - r1Cutoff;
+        if (adjustedR1 && rank <= adjustedFinal) {
+            const range = adjustedFinal - adjustedR1;
             if (range <= 0) return 75;
-            const position = (finalCutoff - rank) / range;
+            const position = (adjustedFinal - rank) / range;
             const prob = 50 + position * 40;
             return Math.min(Math.max(prob, 50), 90);
         }
 
-        if (!r1Cutoff && rank <= finalCutoff) {
-            const ratio = rank / finalCutoff;
+        if (!adjustedR1 && rank <= adjustedFinal) {
+            const ratio = rank / adjustedFinal;
             if (ratio <= 0.8) return 90;
             const prob = 50 + (1 - ratio) * 200;
             return Math.min(Math.max(prob, 50), 90);
         }
 
-        const ratio = rank / finalCutoff;
+        const ratio = rank / adjustedFinal;
         if (ratio <= 1.15) {
             const position = (1.15 - ratio) / 0.15;
             const prob = 20 + position * 29;

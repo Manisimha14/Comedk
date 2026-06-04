@@ -24,6 +24,11 @@ const CollegeCard = (function () {
             </button>
         `;
 
+        const profile = AppData.getStudentProfile();
+        const budgetWarning = (profile.maxBudget && college.fees && college.fees > profile.maxBudget)
+            ? `<span class="badge" style="background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25);">⚠️ Exceeds Budget</span>`
+            : '';
+
         return `
             <div class="college-card" onclick="Router.navigate('/college/${college.college_code}')" data-code="${college.college_code}">
                 <div class="college-card-header">
@@ -40,6 +45,7 @@ const CollegeCard = (function () {
                     ${Badges.tierBadge(college.tier)}
                     ${Badges.probabilityBadge(college.probability, college.probability_text)}
                     ${Badges.categoryBadge(college.category)}
+                    ${budgetWarning}
                 </div>
                 <div class="college-card-metrics">
                     <div class="metric-item">

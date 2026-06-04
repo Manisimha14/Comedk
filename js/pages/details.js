@@ -29,6 +29,27 @@ Pages.Details = (function () {
         }
 
         const profile = AppData.getStudentProfile();
+        
+        // Calculate cutoff safety margin
+        const finalCutoff = college.cutoff_2025_r4 || college.cutoff_2024_r4 || college.cutoff_2025_r3;
+        let marginHtml = '';
+        if (finalCutoff) {
+            const gap = finalCutoff - profile.rank;
+            if (gap >= 0) {
+                marginHtml = `
+                    <div class="note-item pros" style="margin-bottom:16px; line-height:1.4;">
+                        🎯 <strong>Safety Margin Check:</strong> Your rank (<strong>${profile.rank.toLocaleString()}</strong>) is <strong>+${gap.toLocaleString()} ranks safer</strong> than the 2025 final round cutoff (<strong>${finalCutoff.toLocaleString()}</strong>). This represents a solid backup option!
+                    </div>
+                `;
+            } else {
+                marginHtml = `
+                    <div class="note-item cons" style="margin-bottom:16px; line-height:1.4;">
+                        ⚠️ <strong>Safety Margin Check:</strong> Your rank (<strong>${profile.rank.toLocaleString()}</strong>) is <strong>${Math.abs(gap).toLocaleString()} ranks away</strong> from the 2025 final round cutoff (<strong>${finalCutoff.toLocaleString()}</strong>). You will need cutoffs to shift in your favor.
+                    </div>
+                `;
+            }
+        }
+
         const feesDisplay = college.fees ? `₹${college.fees} Lakhs <span style="font-size:0.75rem;color:var(--prob-orange);font-weight:normal;">(Dad's Favorite — 'Jebu Khali!' 💸)</span>` : 'N/A';
         const packageDisplay = college.average_package
             ? `₹${college.average_package} LPA${college.package_type ? ` (${college.package_type === 'E' ? 'ECE' : 'Overall'})` : ''} <span style="font-size:0.75rem;color:var(--safe-color);font-weight:normal;">(Mum's Favorite — 'Kamayi Mukhyam Bigiluu!' 👩‍🍳💰)</span>`
@@ -241,6 +262,8 @@ Pages.Details = (function () {
                             </div>
                         </div>
 
+                        ${marginHtml}
+
                         <!-- Cutoff Chart Canvas -->
                         <div class="chart-container" style="border-top:1px solid var(--border-light); padding-top:16px;">
                             <canvas id="cutoff-chart"></canvas>
@@ -317,6 +340,11 @@ Pages.Details = (function () {
                             <p style="font-size:0.75rem; color:var(--text-muted); margin:0; line-height:1.4;">
                                 💡 Note: The sheet's total fees already include tuition and hostel charges.
                             </p>
+                            ${(profile.maxBudget && college.fees && college.fees > profile.maxBudget) ? `
+                                <div class="note-item cons" style="margin: 0; padding: 10px 14px; font-size: 0.75rem; border-radius: var(--radius-sm); border-left-width: 3px; border-left-style: solid; line-height: 1.4;">
+                                    ⚠️ <strong>Budget Alert:</strong> This college's cost (<strong>₹${college.fees.toFixed(2)} Lakhs</strong>) exceeds your profile budget limit (<strong>₹${profile.maxBudget.toFixed(2)} Lakhs</strong>) by <strong>₹${(college.fees - profile.maxBudget).toFixed(2)} Lakhs</strong>. Consider opting for external PG accommodations to reduce costs.
+                                </div>
+                            ` : ''}
                             <div style="border-top:1px dashed var(--border-light); padding-top:10px; margin-top:4px;">
                                 <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.813rem; font-weight:600; margin-bottom:8px; cursor:pointer;">
                                     <span>Estimate Hostel Split:</span>
